@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Teacher {
+  id           String     @id @unique @default(cuid())
+  fullname     String
+  nickname     String     @unique
+  category     Category?  @relation(fields: [categoryName, categoryId], references: [name, id])
+  feedbacks    Feedback[]
+  averageRate  String?
+  categoryId   String?
+  categoryName String?
+}
+
+model Admin {
+  id       String @id @unique @default(cuid())
+  username String @unique
+  password String
+}
+
+model Feedback {
+  id                  String            @id @unique @default(cuid())
+  title               String
+  interestRate        Rating
+  attentionRate       Rating
+  audienceRate        Rating?
+  communicationRate   Rating
+  professionismRate   Rating
+  technicalRate       Rating
+  audienceNumber      Int
+  teacher             Teacher           @relation(fields: [teacherId], references: [id])
+  feedbacker          Feedbacker        @relation(fields: [feedbackerId], references: [id])
+  givenDate           FeedbackGivenDate @relation(fields: [feedbackGivenDateId], references: [id])
+  comment             String
+  teacherId           String
+  feedbackerId        String
+  feedbackGivenDateId String
+}
+
+model FeedbackGivenDate {
+  id       String     @id @unique @default(cuid())
+  date     DateTime
+  Feedback Feedback[]
+}
+
+model Category {
+  id         String       @id @unique @default(cuid())
+  name       String       @unique
+  teachers   Teacher[]
+  Feedbacker Feedbacker[]
+
+  @@unique([name, id])
+}
+
+model Feedbacker {
+  id           String     @id @unique @default(cuid())
+  fullname     String
+  feedbacks    Feedback[]
+  category     Category?  @relation(fields: [categoryName, categoryId], references: [name, id])
+  categoryId   String?
+  categoryName String?
+}
+
+enum Rating {
+  R1
+  R2
+  R3
+  R4
+  R5
+}
